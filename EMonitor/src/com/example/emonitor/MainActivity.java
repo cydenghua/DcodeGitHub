@@ -2,9 +2,9 @@ package com.example.emonitor;
 
 import java.util.Date;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,7 +16,7 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends Activity {
 
 	private DrawCoordinateSystem mDrawCoordinateSystem;
 	private DrawLineTemperature mDrawLineTemperature;
@@ -42,7 +42,7 @@ public class MainActivity extends ActionBarActivity {
 		// ÃÌº”«˙œﬂ ”Õº
 		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-		lp.addRule(RelativeLayout.BELOW, R.id.button_line);
+//		lp.addRule(RelativeLayout.BELOW, R.id.button_line);
 		final RelativeLayout rLayout = (RelativeLayout) findViewById(R.id.main_activity_layout);
 
 		mDrawCoordinateSystem = new DrawCoordinateSystem(this);
