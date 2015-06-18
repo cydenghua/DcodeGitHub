@@ -39,6 +39,8 @@ public class MainActivity extends Activity {
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);// 设置全屏.
 		setContentView(R.layout.activity_main);
 
+		mDataProcess = new DataProcess();
+		
 		// 添加曲线视图
 		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -50,28 +52,27 @@ public class MainActivity extends Activity {
 		rLayout.addView(mDrawCoordinateSystem);
 		mDrawCoordinateSystem.invalidate();
 
-		mDrawLineTemperature = new DrawLineTemperature(this);
+		mDrawLineTemperature = new DrawLineTemperature(this);		
 		mDrawLineTemperature.setCoordinateSystem(mDrawCoordinateSystem);
+		mDrawLineTemperature.setDataProcess(mDataProcess);
 		mDrawLineTemperature.setLayoutParams(lp);
 		rLayout.addView(mDrawLineTemperature);
 		mDrawLineTemperature.invalidate();
 
 		mDrawLineHumidity = new DrawLineHumidity(this);
 		mDrawLineHumidity.setCoordinateSystem(mDrawCoordinateSystem);
+		mDrawLineHumidity.setDataProcess(mDataProcess);
 		mDrawLineHumidity.setLayoutParams(lp);
 		rLayout.addView(mDrawLineHumidity);
 		mDrawLineHumidity.invalidate();
 
 		mDrawLineLightIntensity = new DrawLineLightIntensity(this);
 		mDrawLineLightIntensity.setCoordinateSystem(mDrawCoordinateSystem);
+		mDrawLineHumidity.setDataProcess(mDataProcess);
 		mDrawLineLightIntensity.setLayoutParams(lp);
 		rLayout.addView(mDrawLineLightIntensity);
 		mDrawLineLightIntensity.invalidate();
 
-		mDataProcess = new DataProcess();
-		mDataProcess.setDrawTemperature(mDrawLineTemperature);
-		mDataProcess.setDrawLight(mDrawLineLightIntensity);
-		mDataProcess.setDrawHumidity(mDrawLineHumidity);
 
 		mTcpClient = null;
 		// connect to the server.
@@ -165,20 +166,23 @@ public class MainActivity extends Activity {
 		protected void onProgressUpdate(char[]... receiveData) {
 			super.onProgressUpdate(receiveData);
 
-			Log.e("AAA", "receive msg, len = " + receiveData.length);
+//			Log.e("AAA", "receive msg., len = " + receiveData.length);
 			for (int i = 0; i < receiveData.length; i++) {
 				// String s = new String(receiveData[i]);
 				// Log.e("AAA", "receive, " + s);
 				if(0==mCount%6) {
 					mDataProcess.processData(receiveData[i]);
 					mCount=0;
-
-					 Log.e("AAA", "receive and proccess********************* " );
+					mDrawLineTemperature.invalidate();
+					mDrawLineHumidity.invalidate();
+					mDrawLineLightIntensity.invalidate();
+//					 Log.e("AAA", "receive and proccess********************* " );
 				}
 				mCount++;
 				// mTextView.setText(s);
 
 			}
+			
 
 			// in the arrayList we add the messaged received from server.
 			// arrayList.add(values[0]);
@@ -203,11 +207,11 @@ public class MainActivity extends Activity {
 					
 
 					if (mTcpClient != null) {
-						// Log.e("AAA", "thread get............." );
+//						 Log.e("AAA", "thread get............." );
 						MainActivity.this.mTcpClient.sendMessage("get");
 					} else {
 						// mBtn.setText("NNNN");
-						Log.e("AAA", "send err..." + new Date().toString());
+//						Log.e("AAA", "send err..." + new Date().toString());
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block

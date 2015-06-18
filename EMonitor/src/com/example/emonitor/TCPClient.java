@@ -48,7 +48,7 @@ public class TCPClient {
     public void sendMessage(String message){
         if (out != null && !out.checkError()) {
 //        	System.out.println("message: "+ message);
-			 Log.e("AAA", "receive, " + message);
+//			 Log.e("AAA", "receive, " + message);
             out.println(message);
             out.flush();
         }

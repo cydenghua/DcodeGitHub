@@ -15,6 +15,7 @@ import android.view.View;
 
 public class DrawCoordinateSystem extends View {
 
+	public static final int MODAL_MIN = 0;
 	public static final int MODAL_DAY = 1;
 	public static final int MODAL_WEEK = 2;
 	public static final int MODAL_MONTH = 3;
@@ -58,19 +59,15 @@ public class DrawCoordinateSystem extends View {
 	}
 
 	private void initData() {
-		mModal = MODAL_DAY;
-		// mModal = MODAL_MONTH;
-		// mModal = MODAL_WEEK;
-
-		Date t = new Date();
-		mBeginTime = new Date(t.getTime() - 2 * 60 * 60 * 1000);
-		mBeginTime.setMinutes(0);
-		mBeginTime.setSeconds(0);
-
-//		Log.e("AAAA.", mBeginTime.toLocaleString());
-//		Log.e("AAAA.", mBeginTime.toString());
-//		Log.e("AAAA.", mBeginTime.toGMTString());
+		mBeginTime = new Date();	 
 		
+		setModal(MODAL_MIN);
+//		setModal(MODAL_DAY);
+//		setModal(MODAL_WEEK);
+//		setModal(MODAL_MONTH); 
+		
+		initBeginTime();
+ 		
 		mPaint = new Paint();
 		mPaint.setAntiAlias(true);
 		mPaint.setTextSize(20);
@@ -85,14 +82,55 @@ public class DrawCoordinateSystem extends View {
 
 	public void setModal(int aModal) {
 		mModal = aModal;
-		if (mModal < MODAL_DAY || mModal > MODAL_MONTH) {
+		if (mModal < MODAL_MIN || mModal > MODAL_MONTH) {
 			mModal = MODAL_DAY;
-		}
+		}		
 	}
 
+	private void initBeginTime() {
+
+		Date t = new Date();
+		if(MODAL_MIN == mModal) {
+			mBeginTime.setTime(t.getTime() - 0 * 1000);			
+		}
+		if(MODAL_DAY == mModal) { 
+			mBeginTime.setTime(t.getTime() - 2 * 60 * 60 * 1000);
+			mBeginTime.setMinutes(0);
+			mBeginTime.setSeconds(0);			
+		}
+		if(MODAL_WEEK == mModal) {
+			
+		}
+		if(MODAL_MONTH == mModal) {
+			
+		}
+	}
+	
+	public void resetBeginTime() {
+		Date t = new Date();
+		if(MODAL_MIN == mModal) {
+			mBeginTime.setTime(t.getTime() - 60 * 1000);			
+		}
+		if(MODAL_DAY == mModal) { 
+			mBeginTime.setTime(t.getTime() - 20 * 60 * 60 * 1000);
+			mBeginTime.setMinutes(0);
+			mBeginTime.setSeconds(0);			
+		}
+		if(MODAL_WEEK == mModal) {
+			
+		}
+		if(MODAL_MONTH == mModal) {
+			
+		}
+		invalidate();
+	}
+	
 	private void setStep(Canvas canvas) {
 
 		double second = 0;
+		if (mModal == MODAL_MIN) {
+			second = 60*2;
+		}
 		if (mModal == MODAL_DAY) {
 			second = 24 * 60 * 60;
 		}
@@ -167,62 +205,57 @@ public class DrawCoordinateSystem extends View {
 			canvas.drawPath(path, mPaintDotLine);
 		}
 
+		if (MODAL_MIN == mModal) {
+			k = 20; // 1 step hour 20 sec
+			t = 6*k; // total 120 sec
+		}
 		if (MODAL_DAY == mModal) {
-			t = 3; // 1step hour 3h
-			k = t * 60 * 60; // 1step second
-			m = 24; // total hour
-			sTmp = "h";
+			k = 3*60*60;  // 1 step sec
+			t = k*8;
 		}
 		if (MODAL_WEEK == mModal) {
-			t = 24; // 1day = 24h
-			k = t * 60 * 60;
-			m = 7 * 24;
-			sTmp = "w";
+			k = 24*60*60;
+			t = k*7;
 		}
 		if (MODAL_MONTH == mModal) {
-			t = 3 * 24; // 3day = 24h
-			k = t * 60 * 60;
-			m = 31 * 24;
-			sTmp = "d";
+			k = 3*24*60*60;
+			t = k*10; 
 		}
-
-		for (int i = 1; i < m / t; i++) {
-			x1 = mZeroX + (int) (mStepX * k * i);
+		
+		for (int j = 1; j < t/k; j++) {
+			x1 = mZeroX + (int) (mStepX * k*j );
 			y1 = mZeroY;
 			canvas.drawLine(x1, y1, x1, y1 - 15, mPaint);
 
-			// Log.e("AAAAAAAA..", "draw x" + x1 + "  y" + y1 );
-			
-			String sText = "";
-			/*
-			if (t < 24) {
-				sText = Integer.toString(i * t) + sTmp;
-			} else {
-				sText = Integer.toString(i * t / 24) + sTmp;
+			if (MODAL_MIN == mModal) {
+				sTmp = k*j + "秒";
 			}
-		   */
-
 			if (MODAL_DAY == mModal) {
-				Date dt = new Date(mBeginTime.getTime() + 1000*i*k);
-//				sText =	(dt.getMonth() + 1) + "月" + dt.getDate()+"日"  + dt.getHours() + "点";
-				sText =	dt.getDate()+"日"  + dt.getHours() + "点";
-//				Log.e("AAAAAAAA..", "draw time " + dt.toLocaleString() );
+				Date dt = new Date(mBeginTime.getTime() + 1000*j*k);
+				sTmp =	dt.getDate()+"日"  + dt.getHours() + "点"; //sText =	(dt.getMonth() + 1) + "月" + dt.getDate()+"日"  + dt.getHours() + "点";				 
 			}
-			
+			if(MODAL_WEEK == mModal) {
+			//todo.					
+			}
+			if(MODAL_MONTH == mModal) {
+			//todo.					
+			}
+						
 			// draw text
-			x2 = x1 - (int) mPaint.measureText(sText);// mCanvas->TextWidth(sTmp)/2;
+			x2 = x1 - (int) mPaint.measureText(sTmp);// mCanvas->TextWidth(sTmp)/2;
 			y2 = y1
 					+ (int) (mPaint.getFontMetrics().descent - mPaint
 							.getFontMetrics().ascent);
-			canvas.drawText(sText, x2, y2, mPaint);
+			canvas.drawText(sTmp, x2, y2, mPaint);
 			 			
 			// draw dot line
 			Path path = new Path();
 			path.moveTo(x1, y1);
 			path.lineTo(x1, mMarginTop);
 			canvas.drawPath(path, mPaintDotLine);
-
+			
 		}
+	
 
 	}
 
@@ -242,6 +275,8 @@ public class DrawCoordinateSystem extends View {
 		// 1);
 		// paint.setPathEffect(effects);
 		// canvas.drawPath(path, paint);
+		
+//		canvas.drawLine(500, 500, 800, 800, mPaint);
 
 	}
 
