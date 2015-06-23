@@ -1,10 +1,10 @@
 package com.example.emonitor;
 
-import java.util.Date;
-
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,9 +25,7 @@ public class MainActivity extends Activity {
 	private DataProcess mDataProcess;
 
 	private TCPClient mTcpClient = null;
-	private connectTask conctTask = null;
-	
-	private int mCount = 0;
+	private ThreadReceiveData mThreadReceiveData = null;
 
 	private Button mBtn;
 
@@ -40,11 +38,11 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		mDataProcess = new DataProcess();
-		
+
 		// 添加曲线视图
 		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-//		lp.addRule(RelativeLayout.BELOW, R.id.button_line);
+		// lp.addRule(RelativeLayout.BELOW, R.id.button_line);
 		final RelativeLayout rLayout = (RelativeLayout) findViewById(R.id.main_activity_layout);
 
 		mDrawCoordinateSystem = new DrawCoordinateSystem(this);
@@ -52,7 +50,7 @@ public class MainActivity extends Activity {
 		rLayout.addView(mDrawCoordinateSystem);
 		mDrawCoordinateSystem.invalidate();
 
-		mDrawLineTemperature = new DrawLineTemperature(this);		
+		mDrawLineTemperature = new DrawLineTemperature(this);
 		mDrawLineTemperature.setCoordinateSystem(mDrawCoordinateSystem);
 		mDrawLineTemperature.setDataProcess(mDataProcess);
 		mDrawLineTemperature.setLayoutParams(lp);
@@ -73,11 +71,7 @@ public class MainActivity extends Activity {
 		rLayout.addView(mDrawLineLightIntensity);
 		mDrawLineLightIntensity.invalidate();
 
-
 		mTcpClient = null;
-		// connect to the server.
-		conctTask = new connectTask();
-		conctTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 		mBtn = (Button) findViewById(R.id.button1);
 		mBtn.setOnClickListener(new OnClickListener() {
@@ -94,7 +88,8 @@ public class MainActivity extends Activity {
 			}
 		});
 
-		new Thread(new ThreadShow()).start();
+		new Thread(new ThreadReceiveData()).start();
+		new Thread(new ThreadGetData()).start();
 	}
 
 	@Override
@@ -121,21 +116,27 @@ public class MainActivity extends Activity {
 		// TODO Auto-generated method stub
 		try {
 			mTcpClient.stopClient();
-			conctTask.cancel(true);
-			conctTask = null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		super.onDestroy();
 	}
 
-	/**
-	 * @author Prashant Adesara receive the message from server with asyncTask
-	 * */
-	public class connectTask extends AsyncTask<char[], char[], TCPClient> {
-
+	private Handler mHandler = new Handler() {
 		@Override
-		protected TCPClient doInBackground(char[]... receiveData) {
+		public void handleMessage(android.os.Message msg) {
+			 mDrawLineTemperature.invalidate();
+			 mDrawLineHumidity.invalidate();
+			 mDrawLineLightIntensity.invalidate();
+//			Log.e("AAA", "thread receive " + msg.what);
+		};
+	};
+
+	class ThreadReceiveData implements Runnable {
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+
 			Log.e("AAA", "create tcp.");
 			// we create a TCPClient object and
 			mTcpClient = new TCPClient(new TCPClient.OnMessageReceived() {
@@ -143,12 +144,9 @@ public class MainActivity extends Activity {
 				// here the messageReceived method is implemented
 				public void messageReceived(char[] receiveData) {
 					try {
-						// this method calls the onProgressUpdate
-						publishProgress(receiveData);
-						// if(message!=null)
-						// {
-						// System.out.println("Return Message from Socket::::: >>>>> "+message);
-						// }
+						mDataProcess.processData(receiveData);
+						mHandler.obtainMessage(3).sendToTarget();
+//						Log.e("AAA", "thread receive.............");
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -157,61 +155,28 @@ public class MainActivity extends Activity {
 			mTcpClient.run();
 			if (mTcpClient != null) {
 				mTcpClient
-						.sendMessage("Initial Message when connected with Socket Server");
+						.sendMessage("Initial Message when connected with Socket Server.");
 			}
-			return null;
-		}
-
-		@Override
-		protected void onProgressUpdate(char[]... receiveData) {
-			super.onProgressUpdate(receiveData);
-
-//			Log.e("AAA", "receive msg., len = " + receiveData.length);
-			for (int i = 0; i < receiveData.length; i++) {
-				// String s = new String(receiveData[i]);
-				// Log.e("AAA", "receive, " + s);
-				if(0==mCount%6) {
-					mDataProcess.processData(receiveData[i]);
-					mCount=0;
-					mDrawLineTemperature.invalidate();
-					mDrawLineHumidity.invalidate();
-					mDrawLineLightIntensity.invalidate();
-//					 Log.e("AAA", "receive and proccess********************* " );
-				}
-				mCount++;
-				// mTextView.setText(s);
-
-			}
-			
-
-			// in the arrayList we add the messaged received from server.
-			// arrayList.add(values[0]);
-
-			// notify the adapter that the data set has changed. This means that
-			// new message received
-			// from server was added to the list
-			// mAdapter.notifyDataSetChanged();
 		}
 	}
 
 	// 线程类
-	class ThreadShow implements Runnable {
+	class ThreadGetData implements Runnable {
 
 		@Override
 		public void run() {
 			// TODO Auto-generated methd stub
 			while (true) {
 				try {
-//					Thread.sleep(10 * 1000);
-					Thread.sleep(300);
-					
+					// Thread.sleep(10 * 1000);
+					Thread.sleep(3 * 1000);
 
 					if (mTcpClient != null) {
-//						 Log.e("AAA", "thread get............." );
+//						Log.e("AAA", "thread get.............");
 						MainActivity.this.mTcpClient.sendMessage("get");
 					} else {
 						// mBtn.setText("NNNN");
-//						Log.e("AAA", "send err..." + new Date().toString());
+						// Log.e("AAA", "send err..." + new Date().toString());
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
