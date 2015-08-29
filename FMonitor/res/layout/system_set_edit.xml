@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@layout/system_set_edit_background"
+    android:orientation="vertical" >
+ <TextView
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:text="系统设置"
+        android:textColor="@color/font_color"
+        android:textSize="20dp" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#ff00a2e8"
+        android:text="" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/textView_server_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="服务地址："
+                android:textSize="20sp" />
+
+            <EditText
+                android:id="@+id/editText_server_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="number|text"  
+                android:layout_weight="1"
+                android:ems="10" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/textView_server_port"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="服务端口："
+                android:textSize="20sp" />
+
+            <EditText
+                android:id="@+id/editText_server_port"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="number" 
+                android:ems="10" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#ff00a2e8"
+        android:text="" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/button_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@layout/background_button2"
+            android:text="保存" />
+
+        <Button
+            android:id="@+id/button_exit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@layout/background_button2"
+            android:text="退出" />
+    </LinearLayout>
+
+</LinearLayout>

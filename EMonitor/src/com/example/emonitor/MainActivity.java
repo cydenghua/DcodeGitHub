@@ -25,7 +25,6 @@ public class MainActivity extends Activity {
 	private DataProcess mDataProcess;
 
 	private TCPClient mTcpClient = null;
-	private ThreadReceiveData mThreadReceiveData = null;
 
 	private Button mBtn;
 
@@ -90,6 +89,8 @@ public class MainActivity extends Activity {
 
 		new Thread(new ThreadReceiveData()).start();
 		new Thread(new ThreadGetData()).start();
+		new Thread(new ThreadDemoData()).start();
+		
 	}
 
 	@Override
@@ -124,10 +125,12 @@ public class MainActivity extends Activity {
 
 	private Handler mHandler = new Handler() {
 		@Override
-		public void handleMessage(android.os.Message msg) {
-			 mDrawLineTemperature.invalidate();
-			 mDrawLineHumidity.invalidate();
-			 mDrawLineLightIntensity.invalidate();
+		public void handleMessage(android.os.Message msg) {			
+			if (SystemDefine.REFRESH_UI == msg.what) {
+				 mDrawLineTemperature.invalidate();
+				 mDrawLineHumidity.invalidate();
+				 mDrawLineLightIntensity.invalidate();	
+			}
 //			Log.e("AAA", "thread receive " + msg.what);
 		};
 	};
@@ -145,7 +148,7 @@ public class MainActivity extends Activity {
 				public void messageReceived(char[] receiveData) {
 					try {
 						mDataProcess.processData(receiveData);
-						mHandler.obtainMessage(3).sendToTarget();
+						mHandler.obtainMessage(SystemDefine.REFRESH_UI).sendToTarget();
 //						Log.e("AAA", "thread receive.............");
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -178,6 +181,44 @@ public class MainActivity extends Activity {
 						// mBtn.setText("NNNN");
 						// Log.e("AAA", "send err..." + new Date().toString());
 					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					System.out.println("thread error...");
+				}
+			}
+		}
+	}
+
+	// Ïß³ÌÀà
+	class ThreadDemoData implements Runnable {
+
+			int k = 0;
+		@Override
+		public void run() {
+			// TODO Auto-generated methd stub
+			while (true) {
+				try {
+					// Thread.sleep(10 * 1000);
+					Thread.sleep(3 * 1000);
+					
+					String sDemo1 = "fdfdfdfd13010200000102010200210202003b0d";
+					String sDemo2 = "fdfdfdfd13010200000102010200260202003b0d";
+					String sDemo3 = "fdfdfdfd13010200000102010200290202003b0d";
+					if(k%3 ==0) { 
+					mDataProcess.processData(sDemo1.toCharArray());
+					}
+					if(k%3 ==1) { 
+					mDataProcess.processData(sDemo2.toCharArray());
+					}
+					if(k%3 ==2) { 
+					mDataProcess.processData(sDemo3.toCharArray());
+					}
+					
+					if(k++>1000) k=0; 
+					
+					mHandler.obtainMessage(SystemDefine.REFRESH_UI).sendToTarget();
+ 
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

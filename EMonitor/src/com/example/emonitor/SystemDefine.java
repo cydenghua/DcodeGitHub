@@ -11,9 +11,7 @@ public class SystemDefine {
 	public static final int DATA_TEMPERATURE = 1;
 	public static final int DATA_HUMIDITY = 2;
 	public static final int DATA_LIGHTINTENSITY = 3;
-	
-	
-	
 
+	public static final int REFRESH_UI = 1;
 
 }
