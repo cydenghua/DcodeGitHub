@@ -1,0 +1,48 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{CEBB7496-3EAD-4162-94D3-03563782BE8C}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="UDPServer.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\FServer\FServer.cbproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="UDPServer">
+			<MSBuild Projects="UDPServer.cbproj"/>
+		</Target>
+		<Target Name="UDPServer:Clean">
+			<MSBuild Targets="Clean" Projects="UDPServer.cbproj"/>
+		</Target>
+		<Target Name="UDPServer:Make">
+			<MSBuild Targets="Make" Projects="UDPServer.cbproj"/>
+		</Target>
+		<Target Name="FServer">
+			<MSBuild Projects="..\FServer\FServer.cbproj"/>
+		</Target>
+		<Target Name="FServer:Clean">
+			<MSBuild Targets="Clean" Projects="..\FServer\FServer.cbproj"/>
+		</Target>
+		<Target Name="FServer:Make">
+			<MSBuild Targets="Make" Projects="..\FServer\FServer.cbproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="UDPServer;FServer"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="UDPServer:Clean;FServer:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="UDPServer:Make;FServer:Make"/>
+		</Target>
+		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+	</Project>

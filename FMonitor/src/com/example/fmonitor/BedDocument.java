@@ -55,10 +55,6 @@ public class BedDocument {
 	}
 	
 	public void receivePacketData(DatagramPacket packet){
-//		if(!mOnline) {
-//			return;		//未注册，不处理	
-//		}
-
 		if (!mStart) {
 			this.startRecord();
 		}
@@ -66,12 +62,12 @@ public class BedDocument {
 		zeroSingleData();
 		
 		byte[] pData = packet.getData();
-		mFHR1_SINGLE = pData[14]&0xFF;//fhr1
-		mFHR2_SINGLE = 0xFF&pData[15];//fhr2
-		mUC_SINGLE = 0xFF&pData[16];//toco宫缩压 (有效数据0-100)
+		mFHR1_SINGLE = pData[15]&0xFF;//fhr1
+		mFHR2_SINGLE = 0xFF&pData[16];//fhr2
+		mUC_SINGLE = 0xFF&pData[17];//toco宫缩压 (有效数据0-100)
 //		pData[17];//afm 自动胎动曲线 (有效数据0-40)  
 //		pData[18];//fm胎动次数 (有效数据0-255)   
-		mFetalModal = pData[19];//胎监模式 (0:单胎监FHR1 1:单胎监FHR2 3:双胎监FHR1&FHR2)     
+		mFetalModal = pData[20];//胎监模式 (0:单胎监FHR1 1:单胎监FHR2 3:双胎监FHR1&FHR2)     
 //		pData[20];//fm_count_mode;	//胎监计数模式 (自动&手动、手动)   
 //		pData[21]; //胎心率报警高限(32-240) 
 //		pData[22]; //胎心率报警低限(30-238)

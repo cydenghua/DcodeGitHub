@@ -43,7 +43,7 @@ public class MainActivity extends Activity {
 	private SharedPreferences sp = null;
 	private InetAddress mServerAddress = null;
 	private int mServerPort = 2013;
-	DatagramSocket mSocket = null;
+	DatagramSocket mServerSocket = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +55,22 @@ public class MainActivity extends Activity {
 
 		createMsgHandler();
 		sp = getSharedPreferences("SERVERINFO", Context.MODE_WORLD_READABLE);
+		int mServerPort = Integer.parseInt(sp.getString("SERVERPORT", "2013")); 
+		try {
+			mServerAddress = InetAddress.getByName(sp.getString(
+					"SERVERADDRESS", "192.168.1.123"));
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block.
+			e.printStackTrace();
+		}
+
+		try {
+			mServerSocket = new DatagramSocket(mServerPort);
+			mServerSocket.setSoTimeout(1000); 			
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		mBedPanelList = new BedPanelList();
 		mBedPanelLinearLayout = (LinearLayout) findViewById(R.id.scrollView1LinearLayout);
@@ -62,17 +78,12 @@ public class MainActivity extends Activity {
 		mBedDocList = new BedDocumentList(MainActivity.this);
 		mBedDocList.setMainMsgHandler(mMsgHandler);
 
-		mNetDataProcessor = new NetDataProcessor();
+		mNetDataProcessor = new NetDataProcessor(mServerSocket);
 		mNetDataProcessor.setBedDocList(mBedDocList);
+		mNetDataProcessor.setmServerAddress(mServerAddress);
+		mNetDataProcessor.setmServerPort(mServerPort);
+		
 
-		int mServerPort = Integer.parseInt(sp.getString("SERVERPORT", "2013")); 
-		try {
-			mServerAddress = InetAddress.getByName(sp.getString(
-					"SERVERADDRESS", "192.168.1.123"));
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		startUDPListen();
 
 		mDrawDocument = new CTGChartDraw();
@@ -240,12 +251,10 @@ public class MainActivity extends Activity {
 		Thread udpThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
-				try {
+				// TODO Auto-generated method stub 
 					// Set up the socket and packet to receive Log.i(LOG_TAG,
 					// "Incoming call listener started");
-					DatagramSocket mSocket = new DatagramSocket(mServerPort);
-					mSocket.setSoTimeout(1000);
+					int k = 5;
 					byte[] buffer = new byte[SystemDefine.BUF_SIZE];
 					DatagramPacket packet = new DatagramPacket(buffer,
 							SystemDefine.BUF_SIZE);
@@ -254,58 +263,59 @@ public class MainActivity extends Activity {
 						// "Listening for incoming calls");
 						if(mDetectMsg) {
 							try {
-								Thread.sleep(3000);
+								Thread.sleep(1000);
 							} catch (InterruptedException e1) {
 								// TODO Auto-generated catch block.
 								e1.printStackTrace();
 							}
-
-							byte[] bDetectPacket = getDetectMsg();
-							DatagramPacket p = new DatagramPacket(bDetectPacket,
-									bDetectPacket.length, mServerAddress,
-									mServerPort);
-							try {
-								Log.e(SystemDefine.LOG_TAG,"Send detect msg.....");
-								mSocket.send(p);
-							} catch (IOException e) {
-								e.printStackTrace();
+							
+							if(k++>5) {
+								k = 0;
+								byte[] bDetectPacket = getDetectMsg();
+								DatagramPacket p = new DatagramPacket(bDetectPacket,
+										bDetectPacket.length, mServerAddress,
+										mServerPort);
+								try {
+									Log.e(SystemDefine.LOG_TAG,"Send detect msg.....");
+									mServerSocket.send(p);
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
 							}
+
 						}
 						
 						try {
-							mSocket.receive(packet);
+							mServerSocket.receive(packet);
 							String data = new String(buffer, 0,
 									packet.getLength());
 							// System.out.println("udp server receive:" + data +
 							// " from " + packet.getAddress().getHostAdress() +
 							// " from " + packet.getAddress().getHostName() );
-							// Log.i(SystemDefine.LOG_TAG,
-							// "Packet received from "+ packet.getAddress()
-							// +" with contents: " + data);
+							 Log.i(SystemDefine.LOG_TAG,
+							 "Packet received from "+ packet.getAddress()
+							 +" with contents: " + data);
 
 							mNetDataProcessor.processorData(packet);
 						} catch (Exception e) {
 						}
 					}
 					// Log.i(LOG_TAG, "Call Listener ending");
-					mSocket.disconnect();
-					mSocket.close();
-				} catch (SocketException e) {
-					// Log.e(LOG_TAG, "SocketException in listener " + e);
-				}
+					mServerSocket.disconnect();
+					mServerSocket.close(); 
 			}
 		});
 		udpThread.start();
 	}
 
 	private byte[] getDetectMsg() {
-		byte[] bDetectPacket = new byte[17];
+		byte[] bDetectPacket = new byte[18];
 		int k = 0;
 		// 2个标志.
-		bDetectPacket[k++] = 0x55;
-		bDetectPacket[k++] = (byte) 0xAA;
+		bDetectPacket[k++] = SystemDefine.PACKET_HEAD1;//0x55;
+		bDetectPacket[k++] = SystemDefine.PACKET_HEAD2;//(byte) 0xAA;
 		// 2字节包长
-		bDetectPacket[k++] = 0x11;
+		bDetectPacket[k++] = 0x12;
 		bDetectPacket[k++] = 0x00;
 		// 4字节包序号
 		bDetectPacket[k++] = 0x00; // mPacketIndex;
@@ -316,6 +326,7 @@ public class MainActivity extends Activity {
 		bDetectPacket[k++] = 0x01;
 		// 1字节包类型
 		bDetectPacket[k++] = SystemDefine.PACKET_DETECT; // 设备 嗅探包
+		bDetectPacket[k++] = 0x00; 
 		// 4字节机器编号
 		bDetectPacket[k++] = 0x00;
 		bDetectPacket[k++] = (byte) 0xD5;
@@ -327,7 +338,7 @@ public class MainActivity extends Activity {
 		bDetectPacket[k++] = (byte) 0xBD;
 		bDetectPacket[k++] = (byte) 0xB1;
 		// 1字节，包尾
-		bDetectPacket[k++] = 0x03;
+		bDetectPacket[k++] = SystemDefine.PACKET_TAIL;
 
 		return bDetectPacket;
 	}
@@ -344,6 +355,7 @@ public class MainActivity extends Activity {
 				}
 				if (SystemDefine.MESSAGE_STOP_DETECT == msg.what) {
 					mDetectMsg = false; 
+					 Log.e(SystemDefine.LOG_TAG, "set detect off ******" );
 				}
 				
 			}
