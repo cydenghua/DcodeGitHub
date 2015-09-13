@@ -12,37 +12,27 @@ import android.widget.Toast;
 public class NetDataProcessor {
 
 	private CRC16 mCRC16 = null;
-	private DatagramSocket mServerSocket = null;
+	private boolean mHaveOnlie = false;
+//	private DatagramSocket mServerSocket = null;
 	private BedDocumentList mBedDocList = null;
-
-	private InetAddress mServerAddress = null;
-	private int mServerPort = 2013;
-	
-	public NetDataProcessor(DatagramSocket serverSocket) {
+ 
+	public NetDataProcessor() {
 		// TODO Auto-generated constructor stub
 		mCRC16 = new CRC16(); 
-		this.mServerSocket = serverSocket;
+//		this.mServerSocket = serverSocket;
 	}
-
-	public void setmServerAddress(InetAddress serverAddress) {
-		this.mServerAddress = serverAddress;
-	}
-
-	public void setmServerPort(int serverPort) {
-		this.mServerPort = serverPort;
-	}
-	
+ 
 	public void setBedDocList(BedDocumentList bedDocList) {
 		mBedDocList = bedDocList;		
 	}
 	 
 	public void processorData(DatagramPacket packet) {
-
 		// Log.i(SystemDefine.LOG_TAG, "Net Data processor from " +
 		// packet.getAddress()
 		// + " with contents: " + packet.getData());
-		
-
+		if(null == packet){
+			return;
+		}
 		Log.e(SystemDefine.LOG_TAG, "receive msg flag:  " + packet.getData()[9] );
 
 		if (checkPacketErr(packet.getData())) {
@@ -91,108 +81,66 @@ public class NetDataProcessor {
 		return false;
 	}
 
-	private void processPacketDetect(DatagramPacket pData) {
-		// TODO Auto-generated method stub
+	private void processPacketDetect(DatagramPacket pData) {		
+		if(mHaveOnlie) {  //已经注册成功， 不再注册
+			return;			
+		}			
 		//收到嗅探回复包， 发送注册信息
 		if(0x02 != pData.getData()[8]) {
 			return;
 		}	
-
-		int k = 0;
-		byte[] bOnLineData = new byte[18];
-		// 2个标志
-		bOnLineData[k++] = SystemDefine.PACKET_HEAD1;// 0x55;
-		bOnLineData[k++] = SystemDefine.PACKET_HEAD2;// (byte)0xAA;
-		// 2字节包长
-		bOnLineData[k++] = 0x12;
-		bOnLineData[k++] = 0x00;
-		// 4字节包序号
-		bOnLineData[k++] = 0x00; // mPacketIndex;
-		bOnLineData[k++] = 0x00;
-		bOnLineData[k++] = 0x00;
-		bOnLineData[k++] = 0x00;
-		// 1字节包状态   0不需要确认， 1需要确认， 2确认应答
-		bOnLineData[k++] = 0x01;
-		// 1字节包类型
-		bOnLineData[k++] = SystemDefine.PACKET_ONLINE; // 设备 注册
-		bOnLineData[k++] = 0x00; // 设备 注册
-		// 4字节机器编号
-		bOnLineData[k++] = 0x01;
-		bOnLineData[k++] = 0x01;
-		bOnLineData[k++] = 0x01;
-		bOnLineData[k++] = 0x01;
-		// N字节数据
-
-		// 2字节，校验码
-		bOnLineData[k++] = 0x01;
-		bOnLineData[k++] = 0x01;
-		// 1字节，包尾
-		bOnLineData[k++] = SystemDefine.PACKET_TAIL;
-
-
-		 Log.e(SystemDefine.LOG_TAG, "Send online data..........") ;
-		
-//		sendMsgBack(pData.getAddress(), pData.getPort(), bOnLineData);		
+ 
+		byte[] data = new byte[0];
+		byte[] bOnLineData = DataPacketCreate.getInstance().getDataPacket(SystemDefine.PACKET_ONLINE, (byte)0x01, data); 
+		 Log.e(SystemDefine.LOG_TAG, "Send online data..........") ;		
 		 sendMsgToServer(bOnLineData);
 	}
 
 	private void processPacketOnline(DatagramPacket pData) {
-		// TODO Auto-generated method stub
-//		mBedDocList.receiveBedOnLineData(pData);
-
 		 Log.e(SystemDefine.LOG_TAG, "receive online data..........") ;
-		mBedDocList.receiveOnLineData(pData);
-		
+		 //设置标记收到嗅探返回包后不再发起注册
+		 mHaveOnlie = true;
+//		mBedDocList.receiveOnLineData(pData);		
 	}
 	
 	private void processPacketOffline(DatagramPacket pData) {
-		// TODO Auto-generated method stub
-
-		byte[] bBack = new byte[18];// pData.getData();
-		System.arraycopy(pData.getData(), 0, bBack, 0, 18);
-
-		bBack[2] = 0x12; //len
-		bBack[3] = 0x00;
-		
-		bBack[8] = 0x02; 
-		// todo alter crc code
-//		sendMsgBack(pData.getAddress(), pData.getPort(), bBack);
-		sendMsgToServer(bBack);
-
+//		byte[] bBack = new byte[18];// pData.getData();
+//		sendMsgToServer(bBack);
 		mBedDocList.receiveBedOffLineData(pData);		
 	}
 
 	private void processPacketFetalData(DatagramPacket pData) {
-		// TODO Auto-generated method stub
+	/*
 		byte[] bBack = new byte[18];// pData.getData();
 		System.arraycopy(pData.getData(), 0, bBack, 0, 18);
-
 //		Log.e(SystemDefine.LOG_TAG, "receive fetal data index is " + pData.getData()[4] );
 		//55AA1100AC 000000022E00D594 27BDB9394700DF07 0700040002001100 1A0036
 		bBack[2] = 0x12; //len
 		bBack[3] = 0x00;
-
-		bBack[8] = 0x02; 
-		 
+		bBack[8] = 0x02;
 		// todo alter crc code
 		bBack[17] = SystemDefine.PACKET_TAIL;
-//		sendMsgBack(pData.getAddress(), pData.getPort(), bBack);
+		sendMsgToServer(bBack);
+*/		
+		
+		Log.e(SystemDefine.LOG_TAG, "***************************receive fetal data index is ");
+		byte[] data = new byte[0];
+		byte[] bBack = DataPacketCreate.getInstance().getDataPacket(SystemDefine.PACKET_FETAL_DATA, (byte)0x02, data);
 		sendMsgToServer(bBack);
 		
 		//process data 
 		mBedDocList.receivePacketData(pData);		
 	}
-
-//	private void sendMsgBack(InetAddress aAddr, int aPort, byte[] bData) {
+ 
 	private void sendMsgToServer(byte[] bData) {
-		DatagramPacket p = new DatagramPacket(bData, bData.length, mServerAddress, mServerPort);
-		try {
-			mServerSocket.send(p);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-//		Log.e(SystemDefine.LOG_TAG, "send msg back  " + mServerPort );
+		NetSocketUDP.getInstance().sendDataArray(bData);
+//		DatagramPacket p = new DatagramPacket(bData, bData.length, mServerAddress, mServerPort);
+//		try {
+//			mServerSocket.send(p);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+ 
 	}
 
 

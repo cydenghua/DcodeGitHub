@@ -29,17 +29,15 @@ __published:	// IDE-managed Components
 	TIdUDPServer *IdUDPServer1;
 	TPanel *Panel1;
 	TButton *Button1;
-	TEdit *Edit1;
-	TEdit *Edit2;
-	TLabel *Label1;
-	TLabel *Label2;
 	TMemo *Memo1;
 	TTimer *Timer1;
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall IdUDPServer1UDPRead(TIdUDPListenerThread *AThread, TBytes AData,
           TIdSocketHandle *ABinding);
 	void __fastcall Timer1Timer(TObject *Sender);
+	void __fastcall Button1Click(TObject *Sender);
 private:	// User declarations
+	bool mOnline;
 	int mLogCount;
 	int mPacketIndex;
 	TIdSocketHandle *mUDPBinding;

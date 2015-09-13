@@ -17,8 +17,8 @@ public class CTGChartDraw {
 	private int mMarginLeft = 40;
 	private int mMarginRight = 0;
 	private int mDrawX = 0;
-	private int mColorBigLine = 0x00745847;
-	private int mColorSmallLine = 0x00BCCADA;
+	private int mColorBigLine = Color.rgb(254, 15, 14);//0x00745847;
+	private int mColorSmallLine = Color.rgb(252, 164, 157); // 0x00BCCADA;
 	private int mPaperSpeed;
 	private int mFhr2StartY = 20; // 第二胎曲线Y坐标起始偏移
 	private int mFhr3StartY = -20; // 第三胎曲线Y坐标起始偏移
@@ -48,8 +48,8 @@ public class CTGChartDraw {
 		setCTGChartStandard(0); // 默认为美国标准
 		setPaperSpeed(3); // 默认走纸速度为3厘米每分
 
-		mColorBigLine = Color.rgb(144, 159, 180);
-		mColorSmallLine = Color.rgb(221, 230, 237);
+//		mColorBigLine = Color.rgb(144, 159, 180);
+//		mColorSmallLine = Color.rgb(221, 230, 237);
 	}
 
 	public void setCTGChartStandard(int AStandard) {
@@ -140,14 +140,21 @@ public class CTGChartDraw {
 
 		mPaint.setTextSize(mCTGFontSize);
 		// 画心率正常范围 正常范围为120-160
-		mPaint.setColor(Color.rgb(211, 223, 232));
+		mPaint.setColor(Color.rgb(201, 230, 172));
 		canvas.drawColor(Color.WHITE);
-		canvas.drawRect(mMarginLeft, mLineLarge * 0 + mMarginTop,
-				canvas.getWidth() - mMarginRight, mLineLarge
-						* (mFhrMaxLine - mConfigFhrMax) + mMarginTop, mPaint);
-		canvas.drawRect(mMarginLeft, mLineLarge * (mFhrMaxLine - mConfigFhrMin)
-				+ mMarginTop, canvas.getWidth() - mMarginRight, mLineLarge
-				* (mFhrMaxLine - mFhrMinLine) + mMarginTop, mPaint);
+		canvas.drawRect(mMarginLeft, 
+				mLineLarge	* (mFhrMaxLine - mConfigFhrMax) + mMarginTop,
+				canvas.getWidth() - mMarginRight, 
+				mLineLarge * (mFhrMaxLine - mConfigFhrMin)+ mMarginTop,
+				mPaint);
+//		mPaint.setColor(Color.rgb(211, 223, 232));
+//		canvas.drawColor(Color.WHITE);
+//		canvas.drawRect(mMarginLeft, mLineLarge * 0 + mMarginTop,
+//				canvas.getWidth() - mMarginRight, mLineLarge
+//						* (mFhrMaxLine - mConfigFhrMax) + mMarginTop, mPaint);
+//		canvas.drawRect(mMarginLeft, mLineLarge * (mFhrMaxLine - mConfigFhrMin)
+//				+ mMarginTop, canvas.getWidth() - mMarginRight, mLineLarge
+//				* (mFhrMaxLine - mFhrMinLine) + mMarginTop, mPaint);
 
 		for (int i = 0; i < mFhrLineNum; i++) {
 			// 设置画笔颜色

@@ -3,6 +3,7 @@ package com.example.fmonitor;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.util.Log;
 
 public class SystemDefine {
 
@@ -16,7 +17,7 @@ public class SystemDefine {
 
 	public static final byte PACKET_HEAD1 = 0x55; // 包头1
 	public static final byte PACKET_HEAD2 = (byte) 0xAA; // 包头2
-	public static final byte PACKET_TAIL = 0x05; // 包尾
+	public static final byte PACKET_TAIL = 0x05; // 包尾.
 
 	public static final byte PACKET_ONLINE = 0x12; // 设备上线注册
 	public static final byte PACKET_OFFLINE = 0x14; // 设备注销
@@ -35,16 +36,6 @@ public class SystemDefine {
 
 	public SystemDefine() {
 		super();
-		// TODO Auto-generated constructor stub
-		   //获取wifi服务  
-        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);  
-        //判断wifi是否开启  
-        if (!wifiManager.isWifiEnabled()) {  
-        wifiManager.setWifiEnabled(true);    
-        }  
-        WifiInfo wifiInfo = wifiManager.getConnectionInfo();       
-        int ipAddress = wifiInfo.getIpAddress();   
-//        String ip = intToIp(ipAddress); 
 	}
 
 	private static SystemDefine single = null;
@@ -55,6 +46,15 @@ public class SystemDefine {
 			single = new SystemDefine();
 		}
 		return single;
+	}
+	
+	public void setMachineNo(int machineNo) {
+		Ip1 = (byte)(machineNo & 0xFF);
+		Ip2 = (byte)((machineNo>>8) & 0xFF);
+		Ip3 = (byte)((machineNo>>16) & 0xFF);
+		Ip4 = (byte)((machineNo>>24) & 0xFF);
+		
+		Log.e(LOG_TAG, "ip " + Ip1 + ":" + Ip2 + ":" + Ip3 + ":" + Ip4 );
 	}
 
 	public byte getIp1() {

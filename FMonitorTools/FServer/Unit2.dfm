@@ -21,44 +21,14 @@ object Form2: TForm2
     Height = 65
     Align = alTop
     TabOrder = 0
-    Visible = False
-    object Label1: TLabel
-      Left = 24
-      Top = 13
-      Width = 31
-      Height = 13
-      Caption = 'Label1'
-    end
-    object Label2: TLabel
-      Left = 24
-      Top = 32
-      Width = 31
-      Height = 13
-      Caption = 'Label2'
-    end
     object Button1: TButton
-      Left = 392
-      Top = 8
-      Width = 75
-      Height = 25
-      Caption = 'Button1'
+      Left = 16
+      Top = 12
+      Width = 129
+      Height = 43
+      Caption = 'SaveToFile'
       TabOrder = 0
-    end
-    object Edit1: TEdit
-      Left = 61
-      Top = 5
-      Width = 121
-      Height = 21
-      TabOrder = 1
-      Text = 'Edit1'
-    end
-    object Edit2: TEdit
-      Left = 61
-      Top = 33
-      Width = 121
-      Height = 21
-      TabOrder = 2
-      Text = 'Edit2'
+      OnClick = Button1Click
     end
   end
   object Memo1: TMemo

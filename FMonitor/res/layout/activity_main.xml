@@ -3,7 +3,7 @@
     android:id="@+id/activity_main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.fmonitor.MainActivity" >
+    tools:context="com.example.fmonitor.ActivityMain" >
 
     <RelativeLayout
         android:id="@+id/activity_main_layout_left"
@@ -14,13 +14,14 @@
         <ScrollView
             android:id="@+id/scrollView1"
             android:layout_width="180sp"
+                android:background="@color/background_color_white"
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true" >
 
             <LinearLayout
                 android:id="@+id/scrollView1LinearLayout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="wrap_content" 
                 android:orientation="vertical" >
             </LinearLayout>
         </ScrollView>

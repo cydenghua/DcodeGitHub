@@ -6,6 +6,7 @@
     
     <dimen name="font_size">20sp</dimen>
     <color name="font_color">#5F6E83</color>
+    <color name="background_color_white">#FFFFFFFF</color>
     <color name="background_color_heavy">#FF839DB4</color>
     <color name="background_color_light">#FFE9F4FD</color>
     <color name="background_color_selected">#FFE3E75A</color>

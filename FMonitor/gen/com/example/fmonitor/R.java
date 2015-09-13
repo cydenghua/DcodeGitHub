@@ -15,11 +15,12 @@ public final class R {
     public static final class attr {
     }
     public static final class color {
-        public static final int background_color_heavy=0x7f060001;
-        public static final int background_color_light=0x7f060002;
-        public static final int background_color_selected=0x7f060003;
+        public static final int background_color_heavy=0x7f060002;
+        public static final int background_color_light=0x7f060003;
+        public static final int background_color_selected=0x7f060004;
+        public static final int background_color_white=0x7f060001;
         public static final int font_color=0x7f060000;
-        public static final int menu_text_color=0x7f060004;
+        public static final int menu_text_color=0x7f060005;
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 

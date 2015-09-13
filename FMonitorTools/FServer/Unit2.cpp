@@ -23,6 +23,7 @@ void __fastcall TForm2::FormCreate(TObject *Sender)
 //	mServerHost = "192.168.1.103";
 //	mServerPort = 2011;
 	mLogCount = 0;
+	mOnline = false;
 
 	IdUDPServer1->Bindings->Add();
 	IdUDPServer1->Bindings->Items[0]->Port = 2013;
@@ -42,7 +43,7 @@ void TForm2::SendUDPData(Sysutils::TBytes ABuffer, TIdSocketHandle *ABinding)
 {
 	IdUDPServer1->SendBuffer(ABinding->PeerIP, ABinding->PeerPort, ABuffer);
 
-	LogMsg("---****SEND***********************begin*************************************---");
+	LogMsg("---****SEND***////////////////*begin*************************************---");
 
 	LogMsg("send message to app, size = " + IntToStr(ABuffer.Length));
 	String s = "";
@@ -52,7 +53,7 @@ void TForm2::SendUDPData(Sysutils::TBytes ABuffer, TIdSocketHandle *ABinding)
 	}
 	LogMsg("sned message data:" + s);
 
-	LogMsg("---*****SEND**********************begin*************************************---");
+	LogMsg("---****SEND***////////////////*end*************************************---");
 
 //	IdUDPServer1->SendBuffer(mServerHost, mServerPort, ABuffer);
 }
@@ -108,7 +109,7 @@ void TForm2::ProcessReceiveData(TBytes AData, TIdSocketHandle *ABinding)
 
 void TForm2::DoDetectMsg(TBytes AData, TIdSocketHandle *ABinding)
 {
-	Timer1->Enabled = false;
+//	Timer1->Enabled = false;
 	// 55 AA 11 00 00 00 00 00 01 0A 00 D5 94 27 BD B1 03
 	Sysutils::TBytes ABuffer; // = new TBytes;
 	ABuffer.set_length(100);
@@ -146,6 +147,10 @@ void TForm2::DoDetectMsg(TBytes AData, TIdSocketHandle *ABinding)
 	ABuffer.set_length(k);
 
 	SendUDPData(ABuffer,ABinding);
+
+	if(mOnline) {
+		Timer1Timer(this);
+    }
 }
 //---------------------------------------------------------------------------
 
@@ -189,6 +194,7 @@ void TForm2::DoOnlineMsg(TBytes AData, TIdSocketHandle *ABinding)
 
 	SendUDPData(ABuffer,ABinding);
 	StartSendFetalData(ABinding);
+
 }
 //---------------------------------------------------------------------------
 
@@ -196,7 +202,8 @@ void TForm2::StartSendFetalData(TIdSocketHandle *ABinding)
 {	//begin send fetal data
 	mUDPBinding = ABinding;
 	mPacketIndex = 0;
-	Timer1->Enabled = true;
+	mOnline = true;
+//	Timer1->Enabled = true;
 }
 //---------------------------------------------------------------------------
 
@@ -226,7 +233,7 @@ void __fastcall TForm2::Timer1Timer(TObject *Sender)
 	// 1字节包状态   0不需要确认， 1需要确认， 2确认应答
 	ABuffer[k++] = 0x00;
 	// 2字节包类型
-	ABuffer[k++] = 0x2E; //  10
+	ABuffer[k++] = PACKET_FETAL_DATA; //  10
 	ABuffer[k++] = 0x00; //  10
 	// 4字节机器编号
 	ABuffer[k++] = 0x00;
@@ -262,6 +269,15 @@ void __fastcall TForm2::Timer1Timer(TObject *Sender)
 
 //	IdUDPServer1->SendBuffer(mServerIP, mServerPort, ABuffer);
 	SendUDPData(ABuffer,mUDPBinding);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm2::Button1Click(TObject *Sender)
+{
+	String p = ExtractFileDir(Application->ExeName);
+	String  f ="\\Log" + Now().TimeString() + ".txt";
+	f =	StringReplace(f, ":", "-", TReplaceFlags() << rfReplaceAll);
+	Memo1->Lines->SaveToFile(p+f);
 }
 //---------------------------------------------------------------------------
 
