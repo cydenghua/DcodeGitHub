@@ -1,0 +1,58 @@
+//---------------------------------------------------------------------------
+
+#ifndef Unit2H
+#define Unit2H
+//---------------------------------------------------------------------------
+#include <Classes.hpp>
+#include <Controls.hpp>
+#include <StdCtrls.hpp>
+#include <Forms.hpp>
+#include "IdBaseComponent.hpp"
+#include "IdComponent.hpp"
+#include "IdUDPBase.hpp"
+#include "IdUDPServer.hpp"
+#include <ExtCtrls.hpp>
+//---------------------------------------------------------------------------
+
+#define PACKET_HEAD1 0x55; // 包头1
+#define PACKET_HEAD2 0xAA; // 包头2
+#define PACKET_TAIL  0x05; // 包尾
+
+const Byte PACKET_ONLINE = 0x12; // 设备上线注册
+const Byte PACKET_OFFLINE = 0x14; // 设备注销
+const Byte PACKET_DETECT = 0x0B; // 设备网络探测包
+const Byte PACKET_FETAL_DATA = 0x2E; // 胎监 数据包
+
+class TForm2 : public TForm
+{
+__published:	// IDE-managed Components
+	TIdUDPServer *IdUDPServer1;
+	TPanel *Panel1;
+	TButton *Button1;
+	TEdit *Edit1;
+	TEdit *Edit2;
+	TLabel *Label1;
+	TLabel *Label2;
+	TMemo *Memo1;
+	TTimer *Timer1;
+	void __fastcall FormCreate(TObject *Sender);
+	void __fastcall IdUDPServer1UDPRead(TIdUDPListenerThread *AThread, TBytes AData,
+          TIdSocketHandle *ABinding);
+	void __fastcall Timer1Timer(TObject *Sender);
+private:	// User declarations
+	int mLogCount;
+	int mPacketIndex;
+	void LogMsg(String AMsg);
+	void SendUDPData(Sysutils::TBytes ABuffer, TIdSocketHandle *ABinding);
+	void ProcessReceiveData(TBytes AData, TIdSocketHandle *ABinding);
+	void DoDetectMsg(TBytes AData, TIdSocketHandle *ABinding);
+	void DoOnlineMsg(TBytes AData, TIdSocketHandle *ABinding);
+	void StartSendFetalData(TIdSocketHandle *ABinding);
+
+public:		// User declarations
+	__fastcall TForm2(TComponent* Owner);
+};
+//---------------------------------------------------------------------------
+extern PACKAGE TForm2 *Form2;
+//---------------------------------------------------------------------------
+#endif

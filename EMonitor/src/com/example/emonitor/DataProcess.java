@@ -1,28 +1,33 @@
 package com.example.emonitor;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import android.util.Log;
 
 public class DataProcess {
 
-	private DrawLineTemperature mDrawTemperature;
-	private DrawLineLightIntensity mDrawLight;
-	private DrawLineHumidity mDrawHumidity;
+//	private DrawLineTemperature mDrawTemperature;
+//	private DrawLineLightIntensity mDrawLight;
+//	private DrawLineHumidity mDrawHumidity;
+
+	public List mDataList;
 	
 	public DataProcess() {
 		// TODO Auto-generated constructor stub
+		mDataList = new ArrayList<SingleData>();
 	}
 
-	public void setDrawTemperature(DrawLineTemperature aDrawTemperature) {
-		mDrawTemperature = aDrawTemperature;
-	}
-	public void setDrawLight(DrawLineLightIntensity aDrawLight) {
-		mDrawLight = aDrawLight;
-	}
-	public void setDrawHumidity(DrawLineHumidity aDrawHumidity) {
-		mDrawHumidity = aDrawHumidity;
-	}
+//	public void setDrawTemperature(DrawLineTemperature aDrawTemperature) {
+//		mDrawTemperature = aDrawTemperature;
+//	}
+//	public void setDrawLight(DrawLineLightIntensity aDrawLight) {
+//		mDrawLight = aDrawLight;
+//	}
+//	public void setDrawHumidity(DrawLineHumidity aDrawHumidity) {
+//		mDrawHumidity = aDrawHumidity;
+//	}
 	
 	public void processData(char[] receiveData) {
 		
@@ -34,7 +39,7 @@ public class DataProcess {
 		for (int i = 0; i < receiveData.length; i+=2) {
 			String sData = new String(receiveData, i, 2);
 			iData[i/2] = Integer.parseInt(sData, 16);
-			Log.e("AAA", " data i =" + i/2 +" "+ sData + " int val = " + iData[i/2]);		
+//			Log.e("AAA", " data i =" + i/2 +" "+ sData + " int val = " + iData[i/2]);		
 		}
 		
 		int k = 10;
@@ -42,6 +47,7 @@ public class DataProcess {
 		int pLen;
 		int pVal, pVal1, pVal2;
 		int iParamCount = iData[k++];
+		SingleData sData = new SingleData();
 		for (int i = 0; i < iParamCount; i++) {
 			pType = iData[k++];  //参数类型
 			pLen = iData[k++];  //参数长度
@@ -51,19 +57,18 @@ public class DataProcess {
 
 			//temperature
 			if(0x01 == pType) {
-				Log.e("AAA", "temperature is " + pVal);	
-				mDrawTemperature.addData(new Date(), pVal);
+				sData.mTemperature = pVal;
 			}
 			//humidity
 			if(0x02 == pType) {
-				Log.e("AAA", "humidity is " + pVal);	
-				mDrawHumidity.addData(new Date(), pVal);
+				sData.mHumidity = pVal;
 			}
 			//light
 			if(0x03 == pType) {
-				Log.e("AAA", "light is " + pVal);				
-			}			
+				sData.mLightIntensity = pVal;
+			}
 		}
+		mDataList.add(sData); 
 	}
 
 }
